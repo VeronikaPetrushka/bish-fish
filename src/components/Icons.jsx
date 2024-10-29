@@ -32,6 +32,15 @@ const Icons = ({ type }) => {
     case 'dots':
         imageSource = require('../assets/notes/dots.png');
         break;
+    case 'close':
+        imageSource = require('../assets/notes/close.png');
+        break;
+    case 'calendar':
+        imageSource = require('../assets/notes/calendar.png');
+        break;
+    case 'home':
+        imageSource = require('../assets/notes/home.png');
+        break;
   }
 
   return (

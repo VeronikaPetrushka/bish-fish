@@ -1,16 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, TouchableOpacity, Text, Image, StyleSheet, Dimensions, Button, ScrollView } from "react-native"
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoute, useFocusEffect, useNavigation } from '@react-navigation/native';
 import LinearGradient from "react-native-linear-gradient";
 import CreateNote from './CreateNote';
 import Note from './Note';
+import Menu from './Menu';
 import Icons from "./Icons"
 
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 const Notes = () => {
+    const route = useRoute();
+    const navigation = useNavigation();
+
     const [createPressed, setCreatePressed] = useState(false);
     const [notes, setNotes] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const translateX = useSharedValue(-width * 0.8);
 
     const loadNotes = async () => {
         try {
@@ -25,6 +35,16 @@ const Notes = () => {
         loadNotes();
     }, []);
 
+    useFocusEffect(
+        useCallback(() => {
+            loadNotes();
+            if (route.params?.noteCreationTrigger) {
+                setCreatePressed(true);
+                navigation.setParams({ noteCreationTrigger: false });
+            }
+        }, [route.params])
+    );  
+
     useEffect(() => {
         if (!createPressed) loadNotes();
     }, [createPressed]);
@@ -33,15 +53,44 @@ const Notes = () => {
         setCreatePressed(!createPressed);
     };
 
-    const resetNotes = async () => {
-        await AsyncStorage.removeItem('notes')
-    }
+    const handleCreateNewNote = () => {
+        setCreatePressed(true);
+    };
+
+    const toggleMenu = () => {
+        setIsMenuOpen(prev => !prev);
+    };
+
+    useEffect(() => {
+        translateX.value = withSpring(isMenuOpen ? 0 : -width * 0.75);
+    }, [isMenuOpen]);
+
+    const animatedMenuStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateX: translateX.value }],
+        };
+    });
+
+    const handleCategoryPress = (category) => {
+        setSelectedCategory(category);
+    };
+
+    const filteredNotes = selectedCategory
+        ? notes.filter(note => note.category === selectedCategory)
+        : notes;
 
     return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.container}>
 
+                {isMenuOpen && (
+                    <Animated.View style={[styles.menuContainer, animatedMenuStyle]}>
+                        <Menu onClose={toggleMenu} onCreateNewNote={handleCreateNewNote} setCreatePressed={setCreatePressed}/>
+                    </Animated.View>
+                )}
+
             <View style={styles.upperContainer}>
-                <TouchableOpacity style={styles.toolIcon}>
+                <TouchableOpacity style={styles.toolIcon} onPress={toggleMenu}>
                     <Icons type={'menu'}/>
                 </TouchableOpacity>
                 <Text style={styles.title}>All Notes</Text>
@@ -63,8 +112,6 @@ const Notes = () => {
                 <Text style={styles.inspoBtnText}>Daily inspiration</Text>
                 </LinearGradient>
             </TouchableOpacity>
-
-            <Button title='Reset' onPress={resetNotes}/>
 
             {
                 notes.length === 0 ? (
@@ -91,8 +138,41 @@ const Notes = () => {
                     <CreateNote setCreatePressed={setCreatePressed} />   
                 ) : (
                     <View style={{width: '100%'}}>
+                         <View style={styles.noteBtnContainer}>
+            <TouchableOpacity
+                style={[
+                    styles.noteBtn,
+                    selectedCategory === 'Work' && { backgroundColor: 'rgba(255, 0, 0, 0.3)' , borderColor: '#e54d4d'}
+                ]}
+                onPress={() => handleCategoryPress('Work')}
+            >
+                <Text style={[styles.noteBtnText, selectedCategory === 'Work' && {color: '#e54d4d'}]}>Work</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={[
+                    styles.noteBtn,
+                    selectedCategory === 'Study' && { backgroundColor: 'rgba(255, 255, 0, 0.6)', borderColor: '#b48100'}
+                ]}
+                onPress={() => handleCategoryPress('Study')}
+            >
+                <Text style={[styles.noteBtnText, selectedCategory === 'Study' && { color: '#b48100' }]}>Study</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={[
+                    styles.noteBtn,
+                    selectedCategory === 'Other' && { backgroundColor: 'rgba(205, 255, 188, 1)', borderColor: '#207c00' }
+                ]}
+                onPress={() => handleCategoryPress('Other')}
+            >
+                <Text style={[styles.noteBtnText, selectedCategory === 'Other' && { color: '#207c00'}]}>Other</Text>
+            </TouchableOpacity>
+        </View>
                         <ScrollView style={{width: '100%', height: height * 0.65}}>
-                        <Note notes={notes} />
+                        {filteredNotes.length > 0 ? (
+                                        <Note notes={filteredNotes} loadNotes={loadNotes}/>
+                                    ) : (
+                                        <Text style={styles.noNotesText}>No created notes for selected category.</Text>
+                                    )}
                         <TouchableOpacity style={styles.createBtn} onPress={handleCreatePress}>
                             <Text style={styles.createBtnText}>Create A Note</Text>
                         </TouchableOpacity>
@@ -103,6 +183,7 @@ const Notes = () => {
             }
 
         </View>
+        </GestureHandlerRootView>
     )
 };
 
@@ -114,6 +195,13 @@ const styles = StyleSheet.create({
         padding: 15,
         paddingTop: height * 0.08,
         backgroundColor: '#e8f7ff'
+    },
+    menuContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        height: '100%',
+        zIndex: 10,
     },
     upperContainer: {
         width: '100%',
@@ -142,7 +230,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderRadius: 14,
         overflow: 'hidden',
-        marginBottom: height * 0.05
+        marginBottom: height * 0.02
     },
     gradient: {
         ...StyleSheet.absoluteFillObject,
@@ -166,7 +254,8 @@ const styles = StyleSheet.create({
         width: height * 0.32,
         height: height * 0.32,
         resizeMode: 'contain',
-        marginBottom: height * 0.05
+        marginBottom: height * 0.05,
+        marginTop: height * 0.05
     },
     noNotesTitle: {
         fontSize: 24,
@@ -197,6 +286,30 @@ const styles = StyleSheet.create({
         fontFamily: 'Nunito',
         fontSize: 20,
         color: '#fffdfa',
+    },
+    noteBtnContainer: {
+        flexDirection: 'row',
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: height * 0.02
+    },
+    noteBtn: {
+        width: '31%',
+        padding: 12,
+        color: '#000',
+        borderColor: '#d3d3d3',
+        borderWidth: 0.5,
+        backgroundColor: '#fff',
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    noteBtnText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#000',
+        fontFamily: 'Nunito',
     },
 })
 

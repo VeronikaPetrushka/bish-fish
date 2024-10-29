@@ -10,7 +10,9 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
     const navigation = useNavigation();
     const [title, setTitle] = useState(initialTitle);
     const [note, setNote] = useState(initialNote);
-    const [modalVisible, setModalVisible] = useState(false);
+    const [optionsVisible, setOptionsVisible] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [noteToDelete, setNoteToDelete] = useState(null);
 
     const currentDate = new Date();
     const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${currentDate.getFullYear()}`;
@@ -26,16 +28,36 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
         }
     };
 
-    const handleDeleteNote = async () => {
+    const handleDelete = async () => {
         try {
-            const existingNotes = JSON.parse(await AsyncStorage.getItem('notes')) || [];
-            const updatedNotes = existingNotes.filter(n => n.title !== initialTitle);
+            const storedNotes = JSON.parse(await AsyncStorage.getItem('notes')) || [];
+            const updatedNotes = storedNotes.filter(n => n.title !== noteToDelete.title);
+
             await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+
+            const deletedNotes = JSON.parse(await AsyncStorage.getItem('deleted')) || [];
+            deletedNotes.push(noteToDelete);
+            await AsyncStorage.setItem('deleted', JSON.stringify(deletedNotes));
+
+            setDeleteModalVisible(false);
             navigation.goBack();
         } catch (error) {
             console.error('Failed to delete note:', error);
+            Alert.alert("Error", "Failed to delete the note.");
         }
+        setDeleteModalVisible(false);
     };
+
+    const confirmDelete = async () => {
+        setOptionsVisible(false);
+        setNoteToDelete({ title, note, imageUri });
+        setDeleteModalVisible(true);
+    };
+
+    const handleOptionsVisible = () => {
+        setOptionsVisible(!optionsVisible);
+    };
+
 
     return (
         <View style={styles.container}>
@@ -44,7 +66,7 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
                     <Icons type={'arrow'}/>
                 </TouchableOpacity>
                 <Text style={styles.title}>Edit Note</Text>
-                <TouchableOpacity style={styles.toolIcon} onPress={() => setModalVisible(true)}> 
+                <TouchableOpacity style={styles.toolIcon} onPress={handleOptionsVisible}> 
                     <Icons type={'dots'}/>
                 </TouchableOpacity>
             </View>
@@ -65,29 +87,40 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
                     scrollEnabled={true}
                 />
 
-
-            <Modal
-                transparent={true}
-                visible={modalVisible}
-                animationType="fade"
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalContainer}
-                    activeOpacity={1}
-                    onPress={() => setModalVisible(false)}
-                >
-                    <View style={styles.modalContent}>
+            {
+                optionsVisible && (
+                    <View style={styles.optionsContainer}>
                         <TouchableOpacity onPress={handleSaveAndExit}>
-                            <Text style={styles.modalSaveButton}>Save & Exit</Text>
+                            <Text style={styles.saveButton}>Save & Exit</Text>
                         </TouchableOpacity>
                         <View style={{width: '100%', backgroundColor: '#ddd', height: 0.5}}/>
-                        <TouchableOpacity onPress={handleDeleteNote}>
-                            <Text style={styles.modalDeleteButton}>Delete this note</Text>
+                        <TouchableOpacity onPress={confirmDelete}>
+                            <Text style={styles.deleteButton}>Delete this note</Text>
                         </TouchableOpacity>
                     </View>
-                </TouchableOpacity>
+                )
+            }
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={deleteModalVisible}
+                onRequestClose={() => setDeleteModalVisible(false)}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.deleteModalContent}>
+                        <Text style={styles.modalText}>Are u sure you want to delete this note?</Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setDeleteModalVisible(false)}>
+                                <Text style={styles.modalBtnCancelText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.modalBtnConfirm} onPress={handleDelete}>
+                                <Text style={styles.modalBtnConfirmText}>Yes</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </Modal>
+
         </View>
     )
 };
@@ -138,14 +171,7 @@ const styles = StyleSheet.create({
         height: height * 0.75,
         textAlignVertical: 'top',
     },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'flex-end',
-        paddingRight: 24,
-        paddingTop: height * 0.12
-    },
-    modalContent: {
+    optionsContainer: {
         width: 200,
         backgroundColor: '#fff',
         borderRadius: 14,
@@ -154,19 +180,79 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+        position: 'absolute',
+        right: 24,
+        top: height * 0.12,
     },
-    modalSaveButton: {
+    saveButton: {
         fontSize: 17,
         color: '#000',
         paddingVertical: 11,
         paddingHorizontal: 16
     },
-    modalDeleteButton: {
+    deleteButton: {
         fontSize: 17,
         color: 'red',
         paddingVertical: 11,
         paddingHorizontal: 16
     },
+
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)'
+    },
+    deleteModalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 16,
+        alignItems: 'center',
+    },
+    modalText: {
+        fontSize: 18,
+        fontWeight: '800',
+        lineHeight: 19.36,
+        color: '#000',
+        marginBottom: 25,
+        textAlign: 'center',
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    modalBtnCancel: {
+        width: '48%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12.5,
+        borderRadius: 14,
+        borderWidth: 1.5,
+        borderColor: '#4ca6d9',
+    },
+    modalBtnCancelText: {
+        color: '#000',
+        fontSize: 13,
+        fontWeight: '600',
+        lineHeight: 14.52
+    },
+    modalBtnConfirm: {
+        width: '48%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12.5,
+        borderRadius: 14,
+        backgroundColor: '#4ca6d9',
+    },
+    modalBtnConfirmText: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: '600',
+        lineHeight: 14.52
+    },
+
 });
 
 export default AddNote;

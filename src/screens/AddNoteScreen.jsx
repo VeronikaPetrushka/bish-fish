@@ -2,7 +2,7 @@ import { View } from "react-native"
 import AddNote from "../components/AddNote"
 
 const AddNoteScreen = ({ route }) => {
-    const { title, note, imageUri, date } = route.params;
+    const { title, note, imageUri } = route.params;
 
     return (
         <View style={styles.container}>
@@ -10,7 +10,6 @@ const AddNoteScreen = ({ route }) => {
                 title={title} 
                 note={note} 
                 imageUri={imageUri} 
-                date={date} 
             />
         </View>
     )
