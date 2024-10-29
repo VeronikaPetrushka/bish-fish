@@ -26,11 +26,12 @@ const Icons = ({ type }) => {
         imageSource = require('../assets/notes/image.png');
         iconStyle.push(styles.image);
         break;
-
-    // case 'statistics':
-    //     imageSource = require('../assets/panel/calendar.png');
-    //     iconStyle.push(styles.panel);
-    //     break;
+    case 'arrow':
+        imageSource = require('../assets/notes/arrow.png');
+        break;
+    case 'dots':
+        imageSource = require('../assets/notes/dots.png');
+        break;
   }
 
   return (

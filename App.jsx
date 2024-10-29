@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './src/screens/HomeScreen';
 import NotesScreen from './src/screens/NotesScreen';
+import AddNoteScreen from './src/screens/AddNoteScreen';
 
 enableScreens();
 
@@ -22,6 +23,11 @@ const App = () => {
                         <Stack.Screen 
                             name="NotesScreen" 
                             component={NotesScreen} 
+                            options={{ headerShown: false }} 
+                        />
+                        <Stack.Screen 
+                            name="AddNoteScreen" 
+                            component={AddNoteScreen} 
                             options={{ headerShown: false }} 
                         />
                     </Stack.Navigator>
