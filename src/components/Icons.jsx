@@ -16,8 +16,8 @@ const Icons = ({ type }) => {
     case 'sparkle':
         imageSource = require('../assets/notes/sparkle.png');
         break;
-    case 'edit':
-        imageSource = require('../assets/notes/edit.png');
+    case 'archive':
+        imageSource = require('../assets/notes/archive.png');
         break;
     case 'delete':
         imageSource = require('../assets/notes/delete.png');

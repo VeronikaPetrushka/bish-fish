@@ -2,11 +2,16 @@ import { View } from "react-native"
 import AddNote from "../components/AddNote"
 
 const AddNoteScreen = ({ route }) => {
-    const { title, note } = route.params;
+    const { title, note, imageUri, date } = route.params;
 
     return (
         <View style={styles.container}>
-            <AddNote title={title} note={note} />
+            <AddNote 
+                title={title} 
+                note={note} 
+                imageUri={imageUri} 
+                date={date} 
+            />
         </View>
     )
 }; 

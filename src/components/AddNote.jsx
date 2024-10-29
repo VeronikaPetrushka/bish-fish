@@ -6,16 +6,19 @@ import Icons from "./Icons";
 
 const { height } = Dimensions.get('window');
 
-const AddNote = ({title: initialTitle, note: initialNote}) => {
+const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
     const navigation = useNavigation();
     const [title, setTitle] = useState(initialTitle);
     const [note, setNote] = useState(initialNote);
     const [modalVisible, setModalVisible] = useState(false);
 
+    const currentDate = new Date();
+    const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${currentDate.getFullYear()}`;
+
     const handleSaveAndExit = async () => {
         try {
             const existingNotes = JSON.parse(await AsyncStorage.getItem('notes')) || [];
-            const updatedNotes = existingNotes.map(n => n.title === initialTitle ? { title, note } : n);
+            const updatedNotes = existingNotes.map(n => n.title === initialTitle ? { title, note, imageUri, date: formattedDate } : n);
             await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
             navigation.goBack();
         } catch (error) {
