@@ -1,7 +1,7 @@
 import React from "react"
 import { View, Image, StyleSheet, Dimensions } from "react-native"
 
-const { height, width } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const Welcome = () => {
 
@@ -21,8 +21,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     imgContainer: {
-        width: '100%',
-        height: width * 1.07,
+        width: height * 0.48,
+        height: height * 0.48,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: height * 0.034

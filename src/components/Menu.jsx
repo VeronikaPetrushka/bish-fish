@@ -1,11 +1,13 @@
 import { View, TouchableOpacity, Text, Dimensions, StyleSheet } from "react-native"
 import { useNavigation } from '@react-navigation/native';
+import { useNotesContext } from "../constants/context";
 import Icons from "./Icons"
 
 const { width, height } = Dimensions.get('window');
 
-const Menu = ({ onClose, setCreatePressed }) => {
+const Menu = ({ onClose }) => {
     const navigation = useNavigation();
+    const { setCreatePressed } = useNotesContext();
 
     return (
         <View style={styles.container}>

@@ -8,6 +8,7 @@ import AddNoteScreen from './src/screens/AddNoteScreen';
 import DeletedScreen from './src/screens/DeletedScreen';
 import ArchivedScreen from './src/screens/ArchivedScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
+import { NotesProvider } from './src/constants/context';
 
 enableScreens();
 
@@ -16,7 +17,8 @@ const Stack = createStackNavigator();
 const App = () => {
   
     return (
-        <NavigationContainer>
+        <NotesProvider>
+            <NavigationContainer>
                     <Stack.Navigator initialRouteName="HomeScreen">
                         <Stack.Screen 
                             name="HomeScreen" 
@@ -49,7 +51,8 @@ const App = () => {
                             options={{ headerShown: false }} 
                         />
                     </Stack.Navigator>
-        </NavigationContainer>
+            </NavigationContainer>
+        </NotesProvider>
     );
 };
 

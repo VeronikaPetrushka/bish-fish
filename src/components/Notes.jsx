@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useFocusEffect, useNavigation } from '@react-navigation/native';
 import LinearGradient from "react-native-linear-gradient";
 import { getRandomInspiration } from '../constants/inspiration.js';
+import { useNotesContext } from '../constants/context.js';
 import CreateNote from './CreateNote';
 import Note from './Note';
 import Menu from './Menu';
@@ -16,8 +17,8 @@ const { height, width } = Dimensions.get('window');
 const Notes = () => {
     const route = useRoute();
     const navigation = useNavigation();
+    const { createPressed, setCreatePressed } = useNotesContext();
 
-    const [createPressed, setCreatePressed] = useState(false);
     const [notes, setNotes] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -117,7 +118,7 @@ const Notes = () => {
 
                 {isMenuOpen && (
                     <Animated.View style={[styles.menuContainer, animatedMenuStyle]}>
-                        <Menu onClose={toggleMenu} setCreatePressed={setCreatePressed}/>
+                        <Menu onClose={toggleMenu} />
                     </Animated.View>
                 )}
 
@@ -172,15 +173,16 @@ const Notes = () => {
                 createPressed ? (
                     <CreateNote setCreatePressed={setCreatePressed}/>
                 ) : (
-                    <View style={{width: '100%'}}>
-                        <View style={{width: '100%', paddingHorizontal: 13, alignItems: 'center'}}>
+                    <View style={{width: '100%', paddingHorizontal: 13, alignItems: 'center'}}>
+                        <ScrollView>
                             <Image source={require('../assets/decor/1.png')} style={styles.image}/>
                             <Text style={styles.noNotesTitle}>Create Your First Note</Text>
                             <Text style={styles.noNotesText}>Add a note about anything (your thoughts on climate change, or your history essay) and share it with the world.</Text>
                             <TouchableOpacity style={styles.createBtn} onPress={handleCreatePress}>
                                 <Text style={styles.createBtnText}>Create A Note</Text>
                             </TouchableOpacity>
-                        </View>
+                            <View style={{height: 150}}/>
+                        </ScrollView>
                     </View>
                 )
             }
@@ -365,14 +367,16 @@ const styles = StyleSheet.create({
         height: height * 0.32,
         resizeMode: 'contain',
         marginBottom: height * 0.05,
-        marginTop: height * 0.05
+        marginTop: height * 0.05,
+        alignSelf: 'center'
     },
     noNotesTitle: {
         fontSize: 24,
         fontWeight: '900',
         color: '#403b36',
         fontFamily: 'Nunito',
-        paddingBottom: height * 0.015
+        paddingBottom: height * 0.015,
+        textAlign: 'center'
     },
     noNotesText: {
         fontSize: 16,
