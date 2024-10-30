@@ -34,7 +34,11 @@ const Menu = ({ onClose, setCreatePressed }) => {
                 <Text style={styles.btnText}>Calendar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.btn} onPress={() => {navigation.navigate('NotesScreen'); onClose(); setCreatePressed(false);}}>
+            <TouchableOpacity style={styles.btn} onPress={() => { 
+                setCreatePressed(false);
+                navigation.navigate('NotesScreen');
+                onClose();
+            }}>
                 <View style={styles.icon}>
                     <Icons type={'home'}/>
                 </View>
@@ -42,9 +46,9 @@ const Menu = ({ onClose, setCreatePressed }) => {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.btnCreate} onPress={() => { 
-        navigation.navigate('NotesScreen', { noteCreationTrigger: true });
-        onClose(); 
-    }}>
+                navigation.navigate('NotesScreen', { noteCreationTrigger: true });
+                onClose(); 
+            }}>
                 <Text style={styles.btnCreateText}>Create new note</Text>
             </TouchableOpacity>
         </View>

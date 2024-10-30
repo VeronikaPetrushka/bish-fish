@@ -168,7 +168,7 @@ const Note = ({ notes, loadNotes, deleted, loadDeleted, archived, loadArchived }
                         )
                     )}
                     <View style={styles.cardTextContainer}>
-                        <Text style={styles.cardTitle}>{note.title}</Text>
+                        <Text style={styles.cardTitle} numberOfLines={1} ellipsizeMode="tail">{note.title}</Text>
                         <Text style={styles.cardNote} numberOfLines={2} ellipsizeMode="tail">{note.note || ''}</Text>
                         <View style={{width: '100%', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row'}}>
                             <TouchableOpacity 
@@ -282,7 +282,9 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '600',
         color: '#000',
-        marginBottom: 10
+        marginBottom: 10,
+        overflow: 'hidden',
+        height: 26
     },
     cardNote: {
         fontSize: 18,

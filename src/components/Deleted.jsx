@@ -111,7 +111,7 @@ const Deleted = () => {
                 deleted.length > 0 ? (
                 <ScrollView style={{ width: '100%', height: height * 0.65 }}>
                     {filteredDeleted.length > 0 ? (
-                                        <Note notes={filteredDeleted} loadDeleted={loadDeleted}/>
+                                        <Note deleted={filteredDeleted} loadDeleted={loadDeleted}/>
                                     ) : (
                                         <Text style={styles.noNotesText}>No deleted notes for selected category.</Text>
                                     )}

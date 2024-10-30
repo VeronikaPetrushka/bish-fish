@@ -112,7 +112,7 @@ const Archived = () => {
                 archived.length > 0 ? (
                 <ScrollView style={{ width: '100%', height: height * 0.65 }}>
                     {filteredArchived.length > 0 ? (
-                                        <Note notes={filteredArchived} loadArchived={loadArchived}/>
+                                        <Note archived={filteredArchived} loadArchived={loadArchived}/>
                                     ) : (
                                         <Text style={styles.noNotesText}>No archived notes for selected category.</Text>
                                     )}

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, TouchableOpacity, Text, Image, StyleSheet, Dimensions, Button, ScrollView } from "react-native"
+import { View, TouchableOpacity, Text, Image, StyleSheet, Dimensions, TouchableWithoutFeedback, ScrollView, Modal, TextInput } from "react-native"
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useFocusEffect, useNavigation } from '@react-navigation/native';
 import LinearGradient from "react-native-linear-gradient";
+import { getRandomInspiration } from '../constants/inspiration.js';
 import CreateNote from './CreateNote';
 import Note from './Note';
 import Menu from './Menu';
@@ -21,6 +22,13 @@ const Notes = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const translateX = useSharedValue(-width * 0.8);
+
+    const [inspoModalVisible, setInspoModalVisible] = useState(false);
+    const [currentInspiration, setCurrentInspiration] = useState("");
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchResults, setSearchResults] = useState([]); 
 
     const loadNotes = async () => {
         try {
@@ -53,10 +61,6 @@ const Notes = () => {
         setCreatePressed(!createPressed);
     };
 
-    const handleCreateNewNote = () => {
-        setCreatePressed(true);
-    };
-
     const toggleMenu = () => {
         setIsMenuOpen(prev => !prev);
     };
@@ -72,12 +76,40 @@ const Notes = () => {
     });
 
     const handleCategoryPress = (category) => {
-        setSelectedCategory(category);
+        const newCategory = category === selectedCategory ? null : category;
+        setSelectedCategory(newCategory);
+        handleSearch();
     };
 
     const filteredNotes = selectedCategory
         ? notes.filter(note => note.category === selectedCategory)
         : notes;
+
+    const handleInspoVisible = () => {
+        setInspoModalVisible(!inspoModalVisible);
+        if (!inspoModalVisible) {
+            setCurrentInspiration(getRandomInspiration());
+        }
+    };
+
+    const handleGenerateNewInspo = () => {
+        setCurrentInspiration(getRandomInspiration());
+    };
+
+    const handleSearch = () => {
+        const filteredNotes = notes.filter(note =>
+            (!selectedCategory || note.category === selectedCategory) &&
+            note.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setSearchResults(filteredNotes);
+    };    
+    
+    const toggleSearch = () => {
+        setIsSearching(!isSearching);
+        setSearchQuery("");
+        setSelectedCategory(null);
+        setSearchResults(notes);
+    };
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -85,33 +117,53 @@ const Notes = () => {
 
                 {isMenuOpen && (
                     <Animated.View style={[styles.menuContainer, animatedMenuStyle]}>
-                        <Menu onClose={toggleMenu} onCreateNewNote={handleCreateNewNote} setCreatePressed={setCreatePressed}/>
+                        <Menu onClose={toggleMenu} setCreatePressed={setCreatePressed}/>
                     </Animated.View>
                 )}
 
-            <View style={styles.upperContainer}>
-                <TouchableOpacity style={styles.toolIcon} onPress={toggleMenu}>
-                    <Icons type={'menu'}/>
-                </TouchableOpacity>
-                <Text style={styles.title}>All Notes</Text>
-                <TouchableOpacity style={styles.toolIcon}> 
-                    <Icons type={'search'}/>
-                </TouchableOpacity>
-            </View>
+                {isSearching ? (
+                    <View style={styles.upperContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search notes by title"
+                            placeholderTextColor="#7d7d7d"
+                            value={searchQuery}
+                            onChangeText={text => {
+                                setSearchQuery(text);
+                                handleSearch();
+                            }}
+                        />
+                        <TouchableOpacity style={styles.toolIcon} onPress={toggleSearch}>
+                            <Icons type={'search'} />
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <View style={styles.upperContainer}>
+                        <TouchableOpacity style={styles.toolIcon} onPress={toggleMenu}>
+                            <Icons type={'menu'} />
+                        </TouchableOpacity>
+                        <Text style={styles.title}>All Notes</Text>
+                        <TouchableOpacity style={styles.toolIcon} onPress={toggleSearch}>
+                            <Icons type={'search'} />
+                        </TouchableOpacity>
+                    </View>
+                )}
 
-            <TouchableOpacity style={styles.inspoBtn}>
-                <LinearGradient
-                colors={['#4CA6D9', '#D478FF']}
-                start={{ x: -0.15, y: 0.5 }}
-                end={{ x: 1.1, y: 0.5 }}
-                style={[styles.gradient]}
-            >
-                <View style={styles.sparkleIcon}>
-                    <Icons type={'sparkle'}/>
-                </View>
-                <Text style={styles.inspoBtnText}>Daily inspiration</Text>
-                </LinearGradient>
-            </TouchableOpacity>
+                {!isSearching && (
+                    <TouchableOpacity style={styles.inspoBtn} onPress={handleInspoVisible}>
+                        <LinearGradient
+                            colors={['#4CA6D9', '#D478FF']}
+                            start={{ x: -0.15, y: 0.5 }}
+                            end={{ x: 1.1, y: 0.5 }}
+                            style={[styles.gradient]}
+                        >
+                            <View style={styles.sparkleIcon}>
+                                <Icons type={'sparkle'} />
+                            </View>
+                            <Text style={styles.inspoBtnText}>Daily inspiration</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                )}
 
             {
                 notes.length === 0 ? (
@@ -121,14 +173,14 @@ const Notes = () => {
                     <CreateNote setCreatePressed={setCreatePressed}/>
                 ) : (
                     <View style={{width: '100%'}}>
-            <View style={{width: '100%', paddingHorizontal: 13, alignItems: 'center'}}>
-                <Image source={require('../assets/decor/1.png')} style={styles.image}/>
-            <Text style={styles.noNotesTitle}>Create Your First Note</Text>
-            <Text style={styles.noNotesText}>Add a note about anything (your thoughts on climate change, or your history essay) and share it with the world.</Text>
-            <TouchableOpacity style={styles.createBtn} onPress={handleCreatePress}>
-                <Text style={styles.createBtnText}>Create A Note</Text>
-            </TouchableOpacity>
-            </View>
+                        <View style={{width: '100%', paddingHorizontal: 13, alignItems: 'center'}}>
+                            <Image source={require('../assets/decor/1.png')} style={styles.image}/>
+                            <Text style={styles.noNotesTitle}>Create Your First Note</Text>
+                            <Text style={styles.noNotesText}>Add a note about anything (your thoughts on climate change, or your history essay) and share it with the world.</Text>
+                            <TouchableOpacity style={styles.createBtn} onPress={handleCreatePress}>
+                                <Text style={styles.createBtnText}>Create A Note</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 )
             }
@@ -138,49 +190,107 @@ const Notes = () => {
                     <CreateNote setCreatePressed={setCreatePressed} />   
                 ) : (
                     <View style={{width: '100%'}}>
-                         <View style={styles.noteBtnContainer}>
-            <TouchableOpacity
-                style={[
-                    styles.noteBtn,
-                    selectedCategory === 'Work' && { backgroundColor: 'rgba(255, 0, 0, 0.3)' , borderColor: '#e54d4d'}
-                ]}
-                onPress={() => handleCategoryPress('Work')}
-            >
-                <Text style={[styles.noteBtnText, selectedCategory === 'Work' && {color: '#e54d4d'}]}>Work</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={[
-                    styles.noteBtn,
-                    selectedCategory === 'Study' && { backgroundColor: 'rgba(255, 255, 0, 0.6)', borderColor: '#b48100'}
-                ]}
-                onPress={() => handleCategoryPress('Study')}
-            >
-                <Text style={[styles.noteBtnText, selectedCategory === 'Study' && { color: '#b48100' }]}>Study</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={[
-                    styles.noteBtn,
-                    selectedCategory === 'Other' && { backgroundColor: 'rgba(205, 255, 188, 1)', borderColor: '#207c00' }
-                ]}
-                onPress={() => handleCategoryPress('Other')}
-            >
-                <Text style={[styles.noteBtnText, selectedCategory === 'Other' && { color: '#207c00'}]}>Other</Text>
-            </TouchableOpacity>
-        </View>
-                        <ScrollView style={{width: '100%', height: height * 0.65}}>
-                        {filteredNotes.length > 0 ? (
-                                        <Note notes={filteredNotes} loadNotes={loadNotes}/>
+
+                        {
+                            (!isSearching || searchResults.length > 0) && (
+                                <View style={styles.noteBtnContainer}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.noteBtn,
+                                            selectedCategory === 'Work' && { backgroundColor: 'rgba(255, 0, 0, 0.3)' , borderColor: '#e54d4d'}
+                                        ]}
+                                        onPress={() => handleCategoryPress('Work')}
+                                    >
+                                        <Text style={[styles.noteBtnText, selectedCategory === 'Work' && {color: '#e54d4d'}]}>Work</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.noteBtn,
+                                            selectedCategory === 'Study' && { backgroundColor: 'rgba(255, 255, 0, 0.6)', borderColor: '#b48100'}
+                                        ]}
+                                        onPress={() => handleCategoryPress('Study')}
+                                    >
+                                        <Text style={[styles.noteBtnText, selectedCategory === 'Study' && { color: '#b48100' }]}>Study</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.noteBtn,
+                                            selectedCategory === 'Other' && { backgroundColor: 'rgba(205, 255, 188, 1)', borderColor: '#207c00' }
+                                        ]}
+                                        onPress={() => handleCategoryPress('Other')}
+                                    >
+                                        <Text style={[styles.noteBtnText, selectedCategory === 'Other' && { color: '#207c00'}]}>Other</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )
+                        }
+
+                        <ScrollView style={{ width: '100%', height: height * 0.65 }}>
+                            {isSearching ? (
+                                searchResults.length > 0 ? (
+                                    <Note notes={searchResults} loadNotes={loadNotes} />
+                                ) : (
+                                    <Text style={styles.noNotesText}>No matching results.</Text>
+                                )
+                            ) : (
+                                createPressed ? (
+                                    <CreateNote setCreatePressed={setCreatePressed} />
+                                ) : (
+                                    filteredNotes.length === 0 ? (
+                                        <Text style={styles.noNotesText}>No created notes.</Text>
                                     ) : (
-                                        <Text style={styles.noNotesText}>No created notes for selected category.</Text>
-                                    )}
-                        <TouchableOpacity style={styles.createBtn} onPress={handleCreatePress}>
-                            <Text style={styles.createBtnText}>Create A Note</Text>
-                        </TouchableOpacity>
+                                        <Note notes={notes} loadNotes={loadNotes} />
+                                    )
+                                )
+                            )}
+                            {
+                                !isSearching && (
+                                    <TouchableOpacity style={styles.createBtn} onPress={handleCreatePress}>
+                                        <Text style={styles.createBtnText}>Create A Note</Text>
+                                    </TouchableOpacity>
+                                )
+                            }
                         </ScrollView>
                     </View>
                 )
                 )
             }
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={inspoModalVisible}
+                onRequestClose={handleInspoVisible}>
+                <TouchableWithoutFeedback onPress={handleInspoVisible}>
+                <View style={styles.modalOverlay}>
+                <TouchableOpacity style={styles.inspoBtn} onPress={handleInspoVisible}>
+                    <LinearGradient
+                        colors={['#4CA6D9', '#D478FF']}
+                        start={{ x: -0.15, y: 0.5 }}
+                        end={{ x: 1.1, y: 0.5 }}
+                        style={[styles.gradient]}
+                    >
+                        <View style={styles.sparkleIcon}>
+                            <Icons type={'sparkle'}/>
+                        </View>
+                        <Text style={styles.inspoBtnText}>Daily inspiration</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalText}>Your daily inspiration idea:</Text>
+                        <Text style={styles.modalInspo}>{currentInspiration}</Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity style={styles.modalBtnAdd} onPress={() => navigation.navigate('AddNoteScreen', { title: currentInspiration }, handleInspoVisible())}>
+                                <Text style={styles.modalBtnAddText}>Write this down</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.modalBtnNew} onPress={handleGenerateNewInspo}>
+                                <Text style={styles.modalBtnNewText}>Generate new</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+                </TouchableWithoutFeedback>
+            </Modal>
 
         </View>
         </GestureHandlerRootView>
@@ -230,7 +340,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderRadius: 14,
         overflow: 'hidden',
-        marginBottom: height * 0.02
+        marginBottom: height * 0.02,
     },
     gradient: {
         ...StyleSheet.absoluteFillObject,
@@ -311,6 +421,84 @@ const styles = StyleSheet.create({
         color: '#000',
         fontFamily: 'Nunito',
     },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        paddingTop: height * 0.1565,
+        paddingHorizontal: 15,
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)'
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 16,
+        alignItems: 'center',
+        marginTop: 22
+    },
+    modalText: {
+        fontSize: 18,
+        fontWeight: '800',
+        lineHeight: 19.36,
+        color: '#000',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    modalBtnAdd: {
+        width: '48%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12.5,
+        borderRadius: 14,
+        borderWidth: 1.5,
+        borderColor: '#7301c2',
+    },
+    modalBtnAddText: {
+        color: '#000',
+        fontSize: 13,
+        fontWeight: '600',
+        lineHeight: 14.52
+    },
+    modalBtnNew: {
+        width: '48%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12.5,
+        borderRadius: 14,
+        backgroundColor: '#7301c2',
+    },
+    modalBtnNewText: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: '600',
+        lineHeight: 14.52
+    },
+    modalInspo: {
+        fontSize: 14,
+        fontWeight: '400',
+        lineHeight: 16,
+        color: '#71727a',
+        marginBottom: 28,
+        textAlign: 'center'
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        padding: 8,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        borderRadius: 12,
+        marginRight: 10,
+        color: '#403b36',
+        backgroundColor: '#fff'
+    },
+    
 })
 
 export default Notes;

@@ -1,26 +1,59 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Dimensions, TextInput, Modal } from "react-native"
+import React, { useState, useEffect } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, Dimensions, TextInput, Modal, Alert } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 import Icons from "./Icons";
 
 const { height } = Dimensions.get('window');
 
-const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
+const AddNote = ({ title: initialTitle, note: initialNote, imageUri, isInspoTitle }) => {
     const navigation = useNavigation();
-    const [title, setTitle] = useState(initialTitle);
-    const [note, setNote] = useState(initialNote);
+    const [title, setTitle] = useState(initialTitle || '');
+    const [note, setNote] = useState(initialNote || '');
     const [optionsVisible, setOptionsVisible] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [noteToDelete, setNoteToDelete] = useState(null);
+    const [inputHeight, setInputHeight] = useState(26);
 
+    const defaultImageUri = require('../assets/decor/3.png');
     const currentDate = new Date();
     const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${currentDate.getFullYear()}`;
+
+    useEffect(() => {
+        if (isInspoTitle) {
+            checkAndSaveInspoNote();
+        }
+    }, []);
+
+    const checkAndSaveInspoNote = async () => {
+        try {
+            const existingNotes = JSON.parse(await AsyncStorage.getItem('notes')) || [];
+            const noteExists = existingNotes.some(note => note.title === initialTitle);
+
+            if (!noteExists) {
+                const newNote = {
+                    title: initialTitle,
+                    note: '',
+                    imageUri: defaultImageUri,
+                    date: formattedDate,
+                    category: 'Other',
+                };
+                await AsyncStorage.setItem('notes', JSON.stringify([...existingNotes, newNote]));
+            }
+        } catch (error) {
+            console.error('Failed to save inspiration note:', error);
+        }
+    };
 
     const handleSaveAndExit = async () => {
         try {
             const existingNotes = JSON.parse(await AsyncStorage.getItem('notes')) || [];
             const updatedNotes = existingNotes.map(n => n.title === initialTitle ? { title, note, imageUri, date: formattedDate } : n);
+
+            if (!updatedNotes.some(n => n.title === title)) {
+                updatedNotes.push({ title, note, imageUri: imageUri || defaultImageUri, date: formattedDate, category: 'Other' });
+            }
+
             await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
             navigation.goBack();
         } catch (error) {
@@ -58,7 +91,6 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
         setOptionsVisible(!optionsVisible);
     };
 
-
     return (
         <View style={styles.container}>
             <View style={styles.upperContainer}>
@@ -71,21 +103,25 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
                 </TouchableOpacity>
             </View>
             <TextInput 
-                    style={styles.titleInput}
-                    placeholder= 'Title'
-                    value={title}
-                    placeholderTextColor="#7d7d7d"
-                    onChangeText={setTitle}
-                />
+                style={[styles.titleInput, { height: inputHeight }]}
+                placeholder='Title'
+                value={title}
+                placeholderTextColor="#7d7d7d"
+                onChangeText={setTitle}
+                multiline={true}
+                onContentSizeChange={(event) =>
+                    setInputHeight(event.nativeEvent.contentSize.height)
+                }
+            />
             <TextInput
-                    style={styles.noteInput}
-                    placeholder= 'Note'
-                    value={note}
-                    placeholderTextColor="#5955500"
-                    onChangeText={setNote}
-                    multiline={true}
-                    scrollEnabled={true}
-                />
+                style={styles.noteInput}
+                placeholder='Note'
+                value={note}
+                placeholderTextColor="#595550"
+                onChangeText={setNote}
+                multiline={true}
+                scrollEnabled={true}
+            />
 
             {
                 optionsVisible && (
@@ -93,7 +129,7 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
                         <TouchableOpacity onPress={handleSaveAndExit}>
                             <Text style={styles.saveButton}>Save & Exit</Text>
                         </TouchableOpacity>
-                        <View style={{width: '100%', backgroundColor: '#ddd', height: 0.5}}/>
+                        <View style={{ width: '100%', backgroundColor: '#ddd', height: 0.5 }} />
                         <TouchableOpacity onPress={confirmDelete}>
                             <Text style={styles.deleteButton}>Delete this note</Text>
                         </TouchableOpacity>
@@ -108,7 +144,7 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
                 onRequestClose={() => setDeleteModalVisible(false)}>
                 <View style={styles.modalOverlay}>
                     <View style={styles.deleteModalContent}>
-                        <Text style={styles.modalText}>Are u sure you want to delete this note?</Text>
+                        <Text style={styles.modalText}>Are you sure you want to delete this note?</Text>
                         <View style={styles.modalButtons}>
                             <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setDeleteModalVisible(false)}>
                                 <Text style={styles.modalBtnCancelText}>Cancel</Text>
@@ -120,9 +156,8 @@ const AddNote = ({title: initialTitle, note: initialNote, imageUri }) => {
                     </View>
                 </View>
             </Modal>
-
         </View>
-    )
+    );
 };
 
 const styles = StyleSheet.create({
