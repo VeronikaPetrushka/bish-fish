@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         textAlign: 'center',
         marginBottom: height * 0.012,
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         lineHeight: 27.28
     },
     text: {
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
         color: '#595550',
         textAlign: 'center',
         marginBottom: height * 0.12,
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         lineHeight: 20.8
     },
     btn: {
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     },
     btnText: {
         fontWeight: '900',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         fontSize: 20,
         color: '#fffdfa',
     },

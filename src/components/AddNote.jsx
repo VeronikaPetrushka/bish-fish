@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         fontSize: 16,
         color: '#403b36',
-        fontFamily: 'Nunito'
+        // fontFamily: 'Nunito'
     },
     titleInput: {
         fontSize: 20,
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#595550',
         lineHeight: 23.4,
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         textAlign: 'left',
         width: '100%',
         height: height * 0.75,

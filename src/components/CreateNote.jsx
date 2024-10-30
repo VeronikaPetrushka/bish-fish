@@ -129,7 +129,7 @@ const CreateNote = ({setCreatePressed}) => {
 const styles = StyleSheet.create({
     createBtnText: {
         fontWeight: '900',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         fontSize: 20,
         color: '#fffdfa',
     },
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#000',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         paddingBottom: height * 0.015,
         lineHeight: 18.2
     },
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
         color: '#000',
         fontSize: 20,
         fontWeight: '600',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         marginBottom: height * 0.02
     },
     noteBtnContainer: {
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#000',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
     },
     createNoteBtn: {
         width: '100%',

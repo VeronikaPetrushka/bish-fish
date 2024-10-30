@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         fontSize: 16,
         color: '#403b36',
-        fontFamily: 'Nunito'
+        // fontFamily: 'Nunito'
     },
     inspoBtn: {
         width: '100%',
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     inspoBtnText: {
         fontSize: 17,
         color: '#fff',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         fontWeight: '900'
     },
     image: {
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '900',
         color: '#403b36',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         paddingBottom: height * 0.015,
         textAlign: 'center'
     },
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
         color: '#595550',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         paddingBottom: height * 0.06,
         textAlign: 'center',
         lineHeight: 21.82
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     },
     createBtnText: {
         fontWeight: '900',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         fontSize: 20,
         color: '#fffdfa',
     },
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#000',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
     },
     modalOverlay: {
         flex: 1,

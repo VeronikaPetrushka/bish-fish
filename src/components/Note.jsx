@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#595550',
         lineHeight: 23.4,
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         height: 47,
         marginBottom: 17,
         overflow: 'hidden',
@@ -310,13 +310,13 @@ const styles = StyleSheet.create({
         lineHeight: 23.4,
         fontSize: 18,
         fontWeight: '700',
-        fontFamily: 'Nunito'
+        // fontFamily: 'Nunito'
     },
     cardDate: {
         fontSize: 16,
         fontWeight: '400',
         color: '#000',
-        fontFamily: 'Nunito'
+        // fontFamily: 'Nunito'
     },
     modalOverlay: {
         flex: 1,

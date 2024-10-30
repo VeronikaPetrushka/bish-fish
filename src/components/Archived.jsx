@@ -158,13 +158,13 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         fontSize: 16,
         color: '#403b36',
-        fontFamily: 'Nunito'
+        // fontFamily: 'Nunito'
     },
     noArchived: {
         fontWeight: '700',
         fontSize: 18,
         color: '#403b36',
-        fontFamily: 'Nunito'
+        // fontFamily: 'Nunito'
     },
     noteBtnContainer: {
         flexDirection: 'row',
@@ -188,13 +188,13 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#000',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
     },
     noNotesText: {
         fontSize: 16,
         fontWeight: '700',
         color: '#595550',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         paddingBottom: height * 0.06,
         textAlign: 'center',
         lineHeight: 21.82

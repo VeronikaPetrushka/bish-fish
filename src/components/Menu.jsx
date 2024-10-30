@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     btnText: {
         fontSize: 16,
         fontWeight: '600',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         lineHeight: 20.8
     },
 
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     btnCreateText: {
         fontSize: 18,
         fontWeight: '700',
-        fontFamily: 'Nunito',
+        // fontFamily: 'Nunito',
         lineHeight: 23.4,
         color: '#fff'
     }
